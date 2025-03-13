@@ -36,26 +36,22 @@ class MainActivity : ComponentActivity() {
                     val state by itemViewModel.state.collectAsStateWithLifecycle()
                     if (dialog == true) {
                         SampleDialog(onSuccess = {
-                            if(state is Resource.Success || state is Resource.Update) {
-                                keyboardController?.hide()
-                                val question = if (state is Resource.Success) (state as Resource.Success).question
-                                else (state as Resource.Update).question
-                                if (question.item.userTheoryAnswer.isNotBlank()) {
-                                    itemViewModel.event(ClickEvent.Reset)
-                                    dialog = false
-                                }
-                                else itemViewModel.event(ClickEvent.UserResponse(userResponse = "", isError = true))
-                            }
+                            itemViewModel.event(ClickEvent.Reset)
+                            dialog = false
                         }, dialogText = "You Completed The Test", dialogTitle = "Congratulation", icon = Icons.Default.Info)
                     } else {
-                        DisplayQuestions(state = state, modifier = Modifier
-                            .fillMaxSize()
-                            .padding(innerPadding), answer = {
+                        DisplayQuestions(state = state, modifier = Modifier.fillMaxSize().padding(innerPadding), answer = {
                             itemViewModel.event(it)
                         }, retry = {
                             itemViewModel.event(ClickEvent.Reset)
                         }, success =  {
-                            dialog = true
+                            if(state is Resource.Success || state is Resource.Update) {
+                                keyboardController?.hide()
+                                val question = if (state is Resource.Success) (state as Resource.Success).question
+                                else (state as Resource.Update).question
+                                if (question.item.userTheoryAnswer.isNotBlank()) dialog = true
+                                else itemViewModel.event(ClickEvent.UserResponse(userResponse = "", isError = true))
+                            }
                         })
                     }
                 }
